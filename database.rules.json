@@ -9,7 +9,7 @@
         },
         "participantes": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid",
+            ".write": "auth != null && (auth.uid === $uid || auth.uid === root.child('sesiones').child($codigo).child('meta').child('docenteUid').val())",
             ".validate": "newData.hasChildren(['alias', 'avatar', 'etapa', 'conectado']) && newData.child('alias').isString() && newData.child('alias').val().length >= 2 && newData.child('alias').val().length <= 14 && newData.child('etapa').val() >= 0 && newData.child('etapa').val() <= 7"
           }
         },

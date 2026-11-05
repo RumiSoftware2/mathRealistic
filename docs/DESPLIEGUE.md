@@ -17,4 +17,4 @@ El modo local es el predeterminado y sincroniza pestañas del mismo navegador co
 4. Añade el dominio de producción entre los dominios autorizados de Firebase Authentication.
 5. Despliega en Vercel y prueba el QR, la unión, pausa y reinicio desde dispositivos distintos.
 
-No se hizo un despliegue ni una prueba de QR real desde celular: este entorno no incluye un proyecto Firebase, credenciales, dominio Vercel ni dispositivos móviles. Esos pasos siguen pendientes para aceptar el MVP de producción.
+El sitio `https://math-realistic.vercel.app/` respondió HTTP 200 al comprobarlo. No se pudo verificar una unión de estudiantes ni la sincronización con Firebase porque no hay configuración Firebase en este workspace y no se dispone de celulares para la prueba física del QR. Esos pasos siguen pendientes para aceptar el MVP de producción.

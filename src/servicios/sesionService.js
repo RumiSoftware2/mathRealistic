@@ -7,6 +7,7 @@ const bc = typeof BroadcastChannel === 'undefined' ? null : new BroadcastChannel
 let firebasePromise
 let database
 let authUid
+const presenciaActiva = new Set()
 
 async function firebase() {
   if (!firebaseDisponible) throw new Error('Firebase no está configurado')
@@ -28,7 +29,7 @@ const localWrite = (code, value) => { localStorage.setItem(roomKey(code), JSON.s
 export const modoDemostracion = !firebaseDisponible || entorno.modoSync === 'local'
 
 export async function iniciar() {
-  if (modoDemostracion) return localStorage.getItem('qri:uid') || (() => { const id = crypto.randomUUID(); localStorage.setItem('qri:uid', id); return id })()
+  if (modoDemostracion) return sessionStorage.getItem('qri:uid') || (() => { const id = crypto.randomUUID(); sessionStorage.setItem('qri:uid', id); return id })()
   await firebase()
   return authUid
 }
@@ -82,13 +83,14 @@ export async function unirse(codigo, perfil) {
   const uid = await iniciar()
   if (modoDemostracion) {
     const value = localRead(codigo)
-    if (!value || value.meta?.estado === 'finalizada' || Date.now() > (value.meta?.expiraEn || value.meta?.creadaEn + 86400000)) throw new Error('Sala no encontrada')
+    if (!value) return { ...perfil, uid, modoLocal: true, conectado: false, etapa: 0 }
+    if (value.meta?.estado === 'finalizada' || Date.now() > (value.meta?.expiraEn || value.meta?.creadaEn + 86400000)) throw new Error('Sala finalizada o caducada')
     const names = Object.values(value.participantes || {}).map((p) => p.alias.toLocaleLowerCase())
     let alias = perfil.alias; let index = 2
     while (names.includes(alias.toLocaleLowerCase())) { alias = `${perfil.alias.slice(0, 11)} ${index}`; index += 1 }
     const participante = { ...perfil, alias, uid, unidoEn: Date.now(), conectado: true, epoca: value.meta.epoca || 0 }
     localWrite(codigo, { ...value, participantes: { ...value.participantes, [uid]: participante } })
-    return participante
+    return { ...participante, modoLocal: false }
   }
   const { dbSdk, db } = await firebase()
   const room = await dbSdk.get(dbSdk.ref(db, `sesiones/${codigo}/meta`))
@@ -97,7 +99,22 @@ export async function unirse(codigo, perfil) {
   const previous = await dbSdk.get(ref)
   const perfilFinal = { uid, alias: perfil.alias, avatar: perfil.avatar, epoca: room.val().epoca || 0, unidoEn: Date.now(), conectado: true, etapa: 0, etapasCompletadas: [], resumen: { periodo: 0, disponible: 1000, invertido: 0, ganancias: 0, patrimonio: 1000, nInversiones: 0 } }
   if (!previous.exists()) await dbSdk.set(ref, perfilFinal)
+  activarPresencia(dbSdk, db, codigo, uid)
   return previous.exists() ? { ...previous.val(), uid } : perfilFinal
+}
+
+function activarPresencia(dbSdk, db, codigo, uid) {
+  const key = `${codigo}:${uid}`
+  if (presenciaActiva.has(key)) return
+  presenciaActiva.add(key)
+  dbSdk.onValue(dbSdk.ref(db, '.info/connected'), async (snapshot) => {
+    if (!snapshot.val()) return
+    const ref = dbSdk.ref(db, `sesiones/${codigo}/participantes/${uid}`)
+    try {
+      await dbSdk.onDisconnect(ref).update({ conectado: false, ultimaVez: Date.now() })
+      await dbSdk.update(ref, { conectado: true, ultimaVez: Date.now() })
+    } catch { /* la presencia no debe bloquear el juego */ }
+  })
 }
 
 export async function guardarParticipantes(codigo, participantes) {
