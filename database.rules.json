@@ -1,0 +1,29 @@
+{
+  "rules": {
+    "sesiones": {
+      "$codigo": {
+        ".read": "auth != null",
+        "meta": {
+          ".write": "auth != null && ((!data.exists() && newData.child('docenteUid').val() === auth.uid) || data.child('docenteUid').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['docenteUid', 'estado', 'etapaMaxima', 'epoca', 'creadaEn', 'expiraEn', 'version']) && newData.child('estado').val().matches(/^(esperando|activa|pausada|finalizada)$/) && newData.child('etapaMaxima').val() >= 1 && newData.child('etapaMaxima').val() <= 7"
+        },
+        "participantes": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['alias', 'avatar', 'etapa', 'conectado']) && newData.child('alias').isString() && newData.child('alias').val().length >= 2 && newData.child('alias').val().length <= 14 && newData.child('etapa').val() >= 0 && newData.child('etapa').val() <= 7"
+          }
+        },
+        "eventos": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid"
+          }
+        },
+        "compartidas": {
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || auth.uid === root.child('sesiones').child($codigo).child('meta').child('docenteUid').val())"
+          }
+        }
+      }
+    }
+  }
+}

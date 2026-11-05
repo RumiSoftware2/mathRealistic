@@ -1,16 +1,29 @@
-# React + Vite
+# QR Inversores
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Experiencia educativa con dinero ficticio para explorar y construir las reglas del interés simple y compuesto. Hecha con el Vite + React existentes, JavaScript y CSS convencional.
 
-Currently, two official plugins are available:
+## Desarrollo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```sh
+npm install
+npm run dev
+```
 
-## React Compiler
+Validación del modelo y compilación:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```sh
+npm run verificar:modelo
+npm run lint
+npm run build
+```
 
-## Expanding the ESLint configuration
+## Guía rápida para docentes
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Abre `/docente` y pulsa **Crear sala**. Aparecen el código y un QR para proyectar.
+2. Comparte la dirección de la sala o pide al grupo escanear el QR. Cada estudiante elige un apodo y avatar.
+3. Pulsa **Iniciar**. Puedes pausar, reanudar, cambiar la etapa máxima y reiniciar la sala; los estudiantes conservan su apodo y avatar al reiniciar.
+4. Usa la pregunta detonante para conversar sobre lo que el grupo observa. No se clasifica al grupo por sus monedas.
+
+Por defecto la aplicación usa el **modo demostración local**, que sincroniza pestañas del mismo navegador. Para sincronizar celulares distintos, configura Firebase siguiendo [docs/DESPLIEGUE.md](docs/DESPLIEGUE.md). La dirección de Vercel y la prueba física del QR se deben completar tras desplegar la app con un proyecto Firebase propio.
+
+Consulta [docs/INSPECCION.md](docs/INSPECCION.md), [docs/DECISIONES.md](docs/DECISIONES.md) y [docs/PRUEBAS.md](docs/PRUEBAS.md) para el estado de implementación.
